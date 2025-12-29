@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文藝活動查詢系統</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #9b59b6, #e67e22);
+            color: white;
+            padding: 20px 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 i {
+            color: #ffcc00;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.95;
+            max-width: 1000px;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 25px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: white;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
+            margin-top: 3px;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Main content area */
+        .content-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            width: 100vw;
+        }
+
+        /* Search and Filter Section */
+        .control-panel {
+            background-color: white;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+            height: 200px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #9b59b6;
+            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-btn.active {
+            color: white;
+        }
+
+        .filter-all {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .filter-all.active {
+            background: linear-gradient(135deg, #9b59b6, #e67e22);
+        }
+
+        .filter-cultural-events {
+            background-color: rgba(155, 89, 182, 0.1);
+            color: #9b59b6;
+        }
+
+        .filter-cultural-events.active {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+
+        .filter-cultural-programs {
+            background-color: rgba(230, 126, 34, 0.1);
+            color: #e67e22;
+        }
+
+        .filter-cultural-programs.active {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Events List Container */
+        .events-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        /* Info Box */
+        .info-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #9b59b6;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-box h4 {
+            margin-bottom: 12px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .info-item i {
+            color: #9b59b6;
+            margin-top: 3px;
+        }
+
+        /* Accordion Styles */
+        .events-accordion {
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 18px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header:hover {
+            background: linear-gradient(135deg, #8e44ad, #732d91);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-header.active {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+
+        .section-content {
+            background-color: white;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-content.active {
+            padding: 5px 0 5px 5px;
+            ;
+            max-height: 5000px;
+            overflow-y: auto;
+        }
+
+        .category-counter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 12px;
+            padding: 2px 10px;
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+
+        /* Group headers */
+        .group-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            border-radius: 6px;
+            margin: 5px 0 5px 5px;
+            transition: all 0.2s;
+        }
+
+        .group-header:hover {
+            background: linear-gradient(135deg, #2980b9, #1c5f8a);
+        }
+
+        .group-header.active {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .subgroup-header {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 12px 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            border-radius: 6px;
+            margin: 5px 0 5px 5px;
+            transition: all 0.2s;
+        }
+
+        .subgroup-header:hover {
+            background: linear-gradient(135deg, #27ae60, #219653);
+        }
+
+        .subgroup-header.active {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .detail-header {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            border-radius: 6px;
+            margin: 5px 0 5px 5px;
+            transition: all 0.2s;
+        }
+
+        .detail-header:hover {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+
+        .group-content {
+            background-color: #f8f9fa;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .group-content.active {
+            padding: 5px 0 5px 5px;
+            ;
+            max-height: 5000px;
+            overflow-y: auto;
+        }
+
+        /* Event Items */
+        .event-item {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .event-item:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            border-color: #9b59b6;
+            transform: translateY(-3px);
+        }
+
+        .event-item.active {
+            border-color: #e67e22;
+            background-color: #fff5e6;
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.2);
+        }
+
+        .event-meta {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .data-source-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-cultural-events {
+            background-color: #9b59b6;
+            color: white;
+        }
+
+        .badge-cultural-programs {
+            background-color: #e67e22;
+            color: white;
+        }
+
+        .event-name {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            line-height: 1.4;
+        }
+
+        .event-details {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .event-detail-item {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .event-detail-item i {
+            color: #9b59b6;
+            margin-top: 3px;
+            flex-shrink: 0;
+            width: 16px;
+        }
+
+        .event-detail-label {
+            font-weight: 600;
+            color: #34495e;
+            min-width: 80px;
+        }
+
+        .event-detail-value {
+            flex: 1;
+            color: #555;
+        }
+
+        .event-extra-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 12px 25px;
+            text-align: center;
+            font-size: 0.9rem;
+            border-top: 1px solid #4a6491;
+            z-index: 1000;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #3498db;
+        }
+
+        /* Loading indicator */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #9b59b6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #9b59b6, #e67e22);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            font-weight: 500;
+            max-width: 350px;
+            animation: fadeInOut 3s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            10% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            90% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .header p {
+                font-size: 0.9rem;
+            }
+
+            .header-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .stats-bar {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .search-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .filter-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filter-btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .events-container {
+                padding: 15px;
+                border-top: #1c5f8a 2px solid;
+            }
+
+            .info-box-content {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .footer-links {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .event-detail-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .event-detail-label {
+                min-width: auto;
+            }
+        }
+
+        /* For very small screens like iPhone SE */
+        @media (max-width: 375px) {
+            .header {
+                padding: 12px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .header p {
+                font-size: 0.85rem;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .control-panel {
+                padding: 15px;
+            }
+
+            .search-input {
+                padding: 12px 15px;
+                font-size: 0.95rem;
+            }
+
+            .filter-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+
+            .events-container {
+                padding: 12px;
+            }
+
+            .section-header {
+                padding: 15px;
+                font-size: 0.95rem;
+            }
+
+            .event-item {
+                padding: 15px;
+            }
+
+            .event-name {
+                font-size: 1.1rem;
+            }
+
+            .footer {
+                padding: 10px 15px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-theater-masks"></i> 文藝活動查詢系統</h1>
+
+        <div class="header-info">
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalEvents">0</div>
+                    <div class="stat-label">總活動數</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="culturalEventsCount">0</div>
+                    <div class="stat-label">文化藝術盛事</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="culturalProgramsCount">0</div>
+                    <div class="stat-label">文化節目</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="content-panel">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" class="search-input" placeholder="搜尋活動名稱、地點、主辦機構或日期...">
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button class="filter-btn filter-all active" id="filterAll">
+                            <i class="fas fa-border-all"></i> 全部活動
+                        </button>
+                        <button class="filter-btn filter-cultural-events" id="filterCulturalEvents">
+                            <i class="fas fa-star"></i> 文化藝術盛事
+                        </button>
+                        <button class="filter-btn filter-cultural-programs" id="filterCulturalPrograms">
+                            <i class="fas fa-calendar"></i> 文化節目
+                        </button>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <h4><i class="fas fa-info-circle"></i> 使用說明</h4>
+                    <div class="info-box-content">
+                        <div class="info-item">
+                            <i class="fas fa-search"></i>
+                            <div>
+                                <strong>搜尋功能</strong><br>
+                                輸入關鍵字搜尋活動名稱、地點、主辦機構或日期
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-filter"></i>
+                            <div>
+                                <strong>篩選活動</strong><br>
+                                按活動類型篩選：全部活動、文化藝術盛事、文化節目
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-layer-group"></i>
+                            <div>
+                                <strong>分組瀏覽</strong><br>
+                                活動按日期、地點、主辦機構分組，點擊標題展開/收合
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <div>
+                                <strong>查看詳情</strong><br>
+                                點擊活動卡片查看詳細資訊，再次點擊可收合
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events List Container -->
+            <div class="events-container" id="eventsContainer">
+                <!-- Events will be loaded here -->
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-calendar-plus"></i>
+                    <h3>正在載入文藝活動資料...</h3>
+                    <p>請稍候，我們正在從數據源獲取最新活動資訊</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-copyright">
+                數據來源: 文化體育及旅遊局 | 康樂及文化事務署
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Indicator -->
+    <div class="loading" id="loadingIndicator">
+        <div class="spinner"></div>
+        <p>正在載入文藝活動數據...</p>
+    </div>
+
+    <script>
+        const PROXY_URL = "https://cors-anywhere.herokuapp.com"; // Use a CORS proxy if needed
+
+        // Initialize variables
+        let allEvents = [];
+        let filteredEvents = [];
+        let groupedEvents = {
+            culturalEvents: [],  // 文化藝術盛事
+            culturalPrograms: [] // 文化節目
+        };
+        let venuesData = {}; // Store venue data for cultural programs
+        let activeFilter = 'all'; // Current active filter
+        let activeEventId = null; // Currently active event
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            setupEventListeners();
+            loadAllEventsData();
+
+            // Initially hide empty state
+            document.getElementById('emptyState').style.display = 'none';
+        });
+
+        // Setup button event listeners
+        function setupEventListeners() {
+            // Search input
+            document.getElementById('searchInput').addEventListener('input', function (e) {
+                filterEvents(e.target.value);
+            });
+
+            // Filter buttons
+            document.getElementById('filterAll').addEventListener('click', function () {
+                setActiveFilter('all');
+                filterEventsByType('all');
+            });
+
+            document.getElementById('filterCulturalEvents').addEventListener('click', function () {
+                setActiveFilter('culturalEvents');
+                filterEventsByType('culturalEvents');
+            });
+
+            document.getElementById('filterCulturalPrograms').addEventListener('click', function () {
+                setActiveFilter('culturalPrograms');
+                filterEventsByType('culturalPrograms');
+            });
+        }
+
+        // Set active filter button
+        function setActiveFilter(filterType) {
+            activeFilter = filterType;
+
+            // Update button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const activeBtn = document.getElementById(`filter${filterType.charAt(0).toUpperCase() + filterType.slice(1)}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        // Load all events data
+        async function loadAllEventsData() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.style.display = 'block';
+
+            try {
+                // Load venues data first for cultural programs
+                await loadVenuesData();
+
+                // Load cultural events and cultural programs in parallel
+                await Promise.all([
+                    loadCulturalEventsData(),
+                    loadCulturalProgramsData()
+                ]);
+
+                // Combine all events
+                allEvents = [...groupedEvents.culturalEvents, ...groupedEvents.culturalPrograms];
+                filteredEvents = [...allEvents];
+
+                // Update stats
+                updateStats();
+
+                // Render events list
+                renderEventsList();
+
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+
+                // Show success notification
+                showNotification(`成功載入 ${allEvents.length} 個文藝活動`);
+
+            } catch (error) {
+                console.error('Error loading events data:', error);
+                loadingIndicator.style.display = 'none';
+                showNotification('無法載入文藝活動數據，請稍後再試。', true);
+
+                // Show empty state with error
+                const emptyState = document.getElementById('emptyState');
+                emptyState.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>無法載入活動資料</h3>
+                    <p>請檢查網絡連接或稍後再試</p>
+                    <button onclick="loadAllEventsData()" style="margin-top: 15px; padding: 10px 20px; background: linear-gradient(135deg, #9b59b6, #e67e22); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        重新載入
+                    </button>
+                `;
+                emptyState.style.display = 'block';
+            }
+        }
+
+        // Load cultural events data (文化藝術盛事)
+        async function loadCulturalEventsData() {
+            try {
+                const apiUrl = 'https://portal.csdi.gov.hk/server/services/common/cstb_rcd_1730083459672_43996/MapServer/WFSServer?service=wfs&request=GetFeature&typenames=geotagging&outputFormat=geojson';
+
+                const response = await fetch(`${PROXY_URL}/${apiUrl}`);
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const data = await response.json();
+
+                // Process and format the data
+                groupedEvents.culturalEvents = (data.features || []).map(event => {
+                    const props = event.properties;
+                    return {
+                        id: `cultural-${props.OBJECTID || Math.random()}`,
+                        type: 'culturalEvents',
+                        source: '文化藝術盛事',
+                        date_tc: props.date_tc || '日期待定',
+                        venue_tc: props.venue_tc || '地點待定',
+                        organizer_tc: props.organizer_tc || '主辦機構待定',
+                        event_name_tc: props.event_name_tc || '活動名稱待定',
+                        date_en: props.date_en || '',
+                        venue_en: props.venue_en || '',
+                        organizer_en: props.organizer_en || '',
+                        event_name_en: props.event_name_en || '',
+                        enquiry: props.enquiry || '',
+                        website: props.website || '',
+                        geometry: event.geometry,
+                        properties: props
+                    };
+                });
+
+            } catch (error) {
+                console.error('Error loading Cultural Events data:', error);
+                groupedEvents.culturalEvents = [];
+            }
+        }
+
+        // Load venues data for cultural programs
+        async function loadVenuesData() {
+            try {
+                const apiUrl = 'https://www.lcsd.gov.hk/datagovhk/event/venues.xml';
+
+                const response = await fetch(`${PROXY_URL}/${apiUrl}`);
+
+                if (!response.ok) {
+                    alert(`請先啟用 CORS Proxy 服務（${PROXY_URL}），HTTP 狀態碼: ${response.status}。`);
+                    window.open(PROXY_URL, "_blank");
+                    return;
+                }
+
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                const venues = xmlDoc.getElementsByTagName('venue');
+
+                // Store venues in an object for easy lookup
+                for (let venue of venues) {
+                    const id = venue.getAttribute('id');
+                    const venuec = venue.getElementsByTagName('venuec')[0]?.textContent || '';
+                    const venuee = venue.getElementsByTagName('venuee')[0]?.textContent || '';
+                    const latitude = venue.getElementsByTagName('latitude')[0]?.textContent || '';
+                    const longitude = venue.getElementsByTagName('longitude')[0]?.textContent || '';
+
+                    venuesData[id] = {
+                        venuec: venuec,
+                        venuee: venuee,
+                        latitude: latitude,
+                        longitude: longitude
+                    };
+                }
+
+            } catch (error) {
+                console.error('Error loading Venues data:', error);
+                venuesData = {};
+            }
+        }
+
+        // Load cultural programs data (文化節目)
+        async function loadCulturalProgramsData() {
+            try {
+                const apiUrl = 'https://www.lcsd.gov.hk/datagovhk/event/events.xml';
+
+                const response = await fetch(`${PROXY_URL}/${apiUrl}`);
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                const events = xmlDoc.getElementsByTagName('event');
+
+                // Process each event
+                for (let event of events) {
+                    const id = event.getAttribute('id');
+                    const titlec = event.getElementsByTagName('titlec')[0]?.textContent || '活動名稱待定';
+                    const titlee = event.getElementsByTagName('titlee')[0]?.textContent || '';
+                    const predateC = event.getElementsByTagName('predateC')[0]?.textContent || '日期待定';
+                    const predateE = event.getElementsByTagName('predateE')[0]?.textContent || '';
+                    const venueid = event.getElementsByTagName('venueid')[0]?.textContent || '';
+                    const presenterorgc = event.getElementsByTagName('presenterorgc')[0]?.textContent || '主辦機構待定';
+                    const presenterorge = event.getElementsByTagName('presenterorge')[0]?.textContent || '';
+                    const enquiry = event.getElementsByTagName('enquiry')[0]?.textContent || '';
+                    const submitdate = event.getElementsByTagName('submitdate')[0]?.textContent || '';
+
+                    // Get venue information
+                    const venueInfo = venuesData[venueid] || {};
+
+                    groupedEvents.culturalPrograms.push({
+                        id: `program-${id}`,
+                        type: 'culturalPrograms',
+                        source: '文化節目',
+                        submitdate: submitdate,
+                        venuec: venueInfo.venuec || '地點待定',
+                        presenterorgc: presenterorgc,
+                        titlec: titlec,
+                        venuee: venueInfo.venuee || '',
+                        presenterorge: presenterorge,
+                        titlee: titlee,
+                        predateC: predateC,
+                        predateE: predateE,
+                        enquiry: enquiry,
+                        venueid: venueid,
+                        latitude: venueInfo.latitude,
+                        longitude: venueInfo.longitude,
+                        properties: {
+                            titlec: titlec,
+                            predateC: predateC,
+                            venuec: venueInfo.venuec,
+                            presenterorgc: presenterorgc,
+                            enquiry: enquiry,
+                            submitdate: submitdate
+                        }
+                    });
+                }
+
+                // Sort cultural programs by submitdate descending
+                groupedEvents.culturalPrograms.sort((a, b) => {
+                    return new Date(b.submitdate) - new Date(a.submitdate);
+                });
+
+            } catch (error) {
+                console.error('Error loading Cultural Programs data:', error);
+                groupedEvents.culturalPrograms = [];
+            }
+        }
+
+        // Update statistics display
+        function updateStats() {
+            const totalEvents = allEvents.length;
+            const culturalEventsCount = groupedEvents.culturalEvents.length;
+            const culturalProgramsCount = groupedEvents.culturalPrograms.length;
+
+            document.getElementById('totalEvents').textContent = totalEvents;
+            document.getElementById('culturalEventsCount').textContent = culturalEventsCount;
+            document.getElementById('culturalProgramsCount').textContent = culturalProgramsCount;
+        }
+
+        // Render events list
+        function renderEventsList() {
+            const container = document.getElementById('eventsContainer');
+
+            // Clear existing content
+            container.innerHTML = '';
+
+            // Hide empty state if there are events
+            if (filteredEvents.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <i class="fas fa-search"></i>
+                    <h3>沒有找到相關活動</h3>
+                    <p>請嘗試不同的搜尋關鍵字或篩選條件</p>
+                `;
+                container.appendChild(emptyState);
+                return;
+            }
+
+            // Create cultural events section
+            if (groupedEvents.culturalEvents.length > 0 &&
+                (activeFilter === 'all' || activeFilter === 'culturalEvents')) {
+                const culturalEvents = filteredEvents.filter(e => e.type === 'culturalEvents');
+                culturalEvents.sort((a, b) => {
+                    return new Date(b.submitdate) - new Date(a.submitdate);
+                });
+                if (culturalEvents.length > 0) {
+                    const culturalEventsSection = createEventsSection(
+                        'culturalEvents',
+                        '文化藝術盛事',
+                        'fas fa-star',
+                        culturalEvents,
+                        groupCulturalEvents(culturalEvents)
+                    );
+                    container.appendChild(culturalEventsSection);
+                }
+            }
+
+            // Create cultural programs section
+            if (groupedEvents.culturalPrograms.length > 0 &&
+                (activeFilter === 'all' || activeFilter === 'culturalPrograms')) {
+                const culturalPrograms = filteredEvents.filter(e => e.type === 'culturalPrograms');
+                if (culturalPrograms.length > 0) {
+                    const culturalProgramsSection = createEventsSection(
+                        'culturalPrograms',
+                        '文化節目',
+                        'fas fa-calendar',
+                        culturalPrograms,
+                        groupCulturalPrograms(culturalPrograms)
+                    );
+                    container.appendChild(culturalProgramsSection);
+                }
+            }
+
+            // Add event listeners to all interactive elements
+            setupAccordionListeners();
+            setupEventItemListeners();
+        }
+
+        // Create events section with accordion
+        function createEventsSection(type, title, icon, events, groupedData) {
+            const section = document.createElement('div');
+            section.className = 'events-accordion';
+            section.id = `${type}Section`;
+
+            // Count events in this section
+            const eventCount = events.length;
+
+            section.innerHTML = `
+                <div class="section-header">
+                    <span>
+                        <i class="${icon}"></i> ${title}
+                        <span class="category-counter">${eventCount}</span>
+                    </span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="section-content">
+                    ${createGroupedEventsHTML(type, groupedData)}
+                </div>
+            `;
+
+            return section;
+        }
+
+        // Create grouped events HTML
+        function createGroupedEventsHTML(type, groupedData) {
+            let html = '';
+
+            if (type === 'culturalEvents') {
+                const submitdateList = Object.keys(groupedData);
+                submitdateList.sort((a, b) => {
+                    return b >= a ? 1 : -1;
+                });
+                // Group by date_tc -> venue_tc -> organizer_tc
+                submitdateList.forEach(date => {
+                    const dateGroup = groupedData[date];
+                    html += `
+                        <div class="group-header">
+                            <span><i class="fas fa-calendar-day"></i> 舉辦日期：${date}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="group-content">
+                    `;
+
+                    Object.keys(dateGroup).sort().forEach(venue => {
+                        const venueGroup = dateGroup[venue];
+                        html += `
+                            <div class="subgroup-header">
+                                <span><i class="fas fa-map-marker-alt"></i> ${venue}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="group-content">
+                        `;
+
+                        Object.keys(venueGroup).sort().forEach(organizer => {
+                            const events = venueGroup[organizer];
+                            html += `
+                                <div class="detail-header">
+                                    <span><i class="fas fa-user-tie"></i> ${organizer}</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="group-content">
+                                    ${events.map(event => createEventItemHTML(event)).join('')}
+                                </div>
+                            `;
+                        });
+
+                        html += `</div>`;
+                    });
+
+                    html += `</div>`;
+                });
+            } else if (type === 'culturalPrograms') {
+                // Group by submitdate -> venuec -> presenterorgc
+                Object.keys(groupedData).sort((a, b) => new Date(b) - new Date(a)).forEach(submitdate => {
+                    const dateGroup = groupedData[submitdate];
+                    const formattedDate = formatDate(submitdate);
+
+                    html += `
+                        <div class="group-header">
+                            <span><i class="fas fa-clock"></i> 更新日期： ${formattedDate}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="group-content">
+                    `;
+
+                    Object.keys(dateGroup).sort().forEach(venue => {
+                        const venueGroup = dateGroup[venue];
+                        html += `
+                            <div class="subgroup-header">
+                                <span><i class="fas fa-map-marker-alt"></i> ${venue}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="group-content">
+                        `;
+
+                        Object.keys(venueGroup).sort().forEach(presenterorg => {
+                            const events = venueGroup[presenterorg];
+                            html += `
+                                <div class="detail-header">
+                                    <span><i class="fas fa-user-tie"></i> ${presenterorg}</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="group-content">
+                                    ${events.map(event => createEventItemHTML(event)).join('')}
+                                </div>
+                            `;
+                        });
+
+                        html += `</div>`;
+                    });
+
+                    html += `</div>`;
+                });
+            }
+
+            return html;
+        }
+
+        // Create event item HTML
+        function createEventItemHTML(event) {
+            const badgeClass = event.type === 'culturalEvents' ? 'badge-cultural-events' : 'badge-cultural-programs';
+            const badgeText = event.type === 'culturalEvents' ? '文化藝術盛事' : '文化節目';
+
+            let eventName = event.event_name_tc || event.titlec || '活動名稱待定';
+            let dateInfo = event.date_tc || event.predateC || '日期待定';
+            let venueInfo = event.venue_tc || event.venuec || '地點待定';
+            let organizerInfo = event.organizer_tc || event.presenterorgc || '主辦機構待定';
+            let enquiryInfo = event.enquiry || '';
+            let websiteInfo = event.website || '';
+
+            const isActive = activeEventId === event.id;
+
+            return `
+                <div class="event-item ${isActive ? 'active' : ''}" data-event-id="${event.id}" data-event-type="${event.type}">
+                    <div class="event-meta">
+                        <span class="data-source-badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div class="event-name">${eventName}</div>
+                    <div class="event-details">
+                        <div class="event-detail-item">
+                            <div class="event-detail-label"><i class="fas fa-calendar"></i> 日期時間:</div>
+                            <div class="event-detail-value">${dateInfo}</div>
+                        </div>
+                        <div class="event-detail-item">
+                            <div class="event-detail-label"><i class="fas fa-map-marker-alt"></i> 地點:</div>
+                            <div class="event-detail-value">${venueInfo}</div>
+                        </div>
+                        <div class="event-detail-item">
+                            <div class="event-detail-label"><i class="fas fa-user-tie"></i> 主辦機構:</div>
+                            <div class="event-detail-value">${organizerInfo}</div>
+                        </div>
+                        ${enquiryInfo ? `
+                        <div class="event-detail-item">
+                            <div class="event-detail-label"><i class="fas fa-phone"></i> 查詢:</div>
+                            <div class="event-detail-value">${enquiryInfo}</div>
+                        </div>` : ''}
+                        ${websiteInfo ? `
+                        <div class="event-detail-item">
+                            <div class="event-detail-label"><i class="fas fa-globe"></i> 網址:</div>
+                            <div class="event-detail-value">
+                                <a href="${websiteInfo}" target="_blank">${websiteInfo}</a>
+                            </div>
+                        </div>` : ''}
+                    </div>
+                    ${isActive ? createEventExtraInfoHTML(event) : ''}
+                </div>
+            `;
+        }
+
+        // Create event extra info HTML (shown when event is active)
+        function createEventExtraInfoHTML(event) {
+            let extraInfo = '';
+
+            if (event.type === 'culturalEvents') {
+                if (event.event_name_en) {
+                    extraInfo += `<div><strong>Event Name:</strong> ${event.event_name_en}</div>`;
+                }
+                if (event.date_en) {
+                    extraInfo += `<div><strong>Date:</strong> ${event.date_en}</div>`;
+                }
+                if (event.venue_en) {
+                    extraInfo += `<div><strong>Venue:</strong> ${event.venue_en}</div>`;
+                }
+                if (event.organizer_en) {
+                    extraInfo += `<div><strong>Organizer:</strong> ${event.organizer_en}</div>`;
+                }
+            } else if (event.type === 'culturalPrograms') {
+                if (event.titlee) {
+                    extraInfo += `<div><strong>Event Name:</strong> ${event.titlee}</div>`;
+                }
+                if (event.predateE) {
+                    extraInfo += `<div><strong>Date:</strong> ${event.predateE}</div>`;
+                }
+                if (event.venuee) {
+                    extraInfo += `<div><strong>Venue:</strong> ${event.venuee}</div>`;
+                }
+                if (event.presenterorge) {
+                    extraInfo += `<div><strong>Presenter:</strong> ${event.presenterorge}</div>`;
+                }
+            }
+
+            if (extraInfo) {
+                return `
+                    <div class="event-extra-info" style="display:none">
+                        <div><strong>英文資訊 English Information:</strong></div>
+                        ${extraInfo}
+                    </div>
+                `;
+            }
+
+            return '';
+        }
+
+        // Group cultural events by date_tc -> venue_tc -> organizer_tc
+        function groupCulturalEvents(events) {
+            const grouped = {};
+
+            events.forEach(event => {
+                const date = event.date_tc || '日期待定';
+                const venue = event.venue_tc || '地點待定';
+                const organizer = event.organizer_tc || '主辦機構待定';
+
+                if (!grouped[date]) grouped[date] = {};
+                if (!grouped[date][venue]) grouped[date][venue] = {};
+                if (!grouped[date][venue][organizer]) grouped[date][venue][organizer] = [];
+
+                grouped[date][venue][organizer].push(event);
+            });
+
+            return grouped;
+        }
+
+        // Group cultural programs by submitdate -> venuec -> presenterorgc
+        function groupCulturalPrograms(events) {
+            const grouped = {};
+
+            events.forEach(event => {
+                const submitdate = event.submitdate ? event.submitdate.split(' ')[0] : '日期待定';
+                const venue = event.venuec || '地點待定';
+                const presenterorg = event.presenterorgc || '主辦機構待定';
+
+                if (!grouped[submitdate]) grouped[submitdate] = {};
+                if (!grouped[submitdate][venue]) grouped[submitdate][venue] = {};
+                if (!grouped[submitdate][venue][presenterorg]) grouped[submitdate][venue][presenterorg] = [];
+
+                grouped[submitdate][venue][presenterorg].push(event);
+            });
+
+            return grouped;
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString || dateString === '日期待定') return '日期待定';
+
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+
+                return new Date(date.getTime() + 8 * 3600 * 1000).toISOString().split('T')[0];
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // Setup accordion listeners
+        function setupAccordionListeners() {
+            // Section headers
+            document.querySelectorAll('.section-header').forEach(header => {
+                header.addEventListener('click', function () {
+                    const content = this.nextElementSibling;
+                    const isActive = this.classList.contains('active');
+
+                    // Toggle active class
+                    this.classList.toggle('active');
+                    content.classList.toggle('active');
+
+                    // Rotate icon
+                    const icon = this.querySelector('.fa-chevron-down');
+                    icon.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                });
+            });
+
+            // Group headers
+            document.querySelectorAll('.group-header, .subgroup-header, .detail-header').forEach(header => {
+                header.addEventListener('click', function () {
+                    const content = this.nextElementSibling;
+                    const isActive = this.classList.contains('active');
+
+                    // Toggle active class
+                    this.classList.toggle('active');
+                    content.classList.toggle('active');
+
+                    // Rotate icon
+                    const icon = this.querySelector('.fa-chevron-down');
+                    icon.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                });
+            });
+        }
+
+        // Setup event item listeners
+        function setupEventItemListeners() {
+            document.querySelectorAll('.event-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    const eventId = this.dataset.eventId;
+
+                    // If clicking the same event, toggle it off
+                    if (activeEventId === eventId) {
+                        activeEventId = null;
+                        this.classList.remove('active');
+                        // Remove extra info
+                        const extraInfo = this.querySelector('.event-extra-info');
+                        if (extraInfo) extraInfo.remove();
+                    } else {
+                        // Remove active class from all event items
+                        document.querySelectorAll('.event-item').forEach(i => {
+                            i.classList.remove('active');
+                            const extraInfo = i.querySelector('.event-extra-info');
+                            if (extraInfo) extraInfo.remove();
+                        });
+
+                        // Add active class to clicked item
+                        this.classList.add('active');
+                        activeEventId = eventId;
+
+                        // Find the event data and add extra info
+                        const eventType = this.dataset.eventType;
+                        const event = allEvents.find(e => e.id === eventId && e.type === eventType);
+
+                        if (event) {
+                            // Check if extra info already exists
+                            if (!this.querySelector('.event-extra-info')) {
+                                const extraInfoHTML = createEventExtraInfoHTML(event);
+                                if (extraInfoHTML) {
+                                    this.insertAdjacentHTML('beforeend', extraInfoHTML);
+                                }
+                            }
+
+                            // Scroll to the event item
+                            this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }
+                });
+            });
+        }
+
+        // Filter events based on search input
+        function filterEvents(searchTerm) {
+            const searchLower = searchTerm.toLowerCase().trim();
+
+            if (!searchLower) {
+                filteredEvents = [...allEvents];
+            } else {
+                filteredEvents = allEvents.filter(event => {
+                    const eventName = (event.event_name_tc || event.titlec || '').toLowerCase();
+                    const venue = (event.venue_tc || event.venuec || '').toLowerCase();
+                    const organizer = (event.organizer_tc || event.presenterorgc || '').toLowerCase();
+                    const date = (event.date_tc || event.predateC || '').toLowerCase();
+                    const enquiry = (event.enquiry || '').toLowerCase();
+
+                    return eventName.includes(searchLower) ||
+                        venue.includes(searchLower) ||
+                        organizer.includes(searchLower) ||
+                        date.includes(searchLower) ||
+                        enquiry.includes(searchLower);
+                });
+            }
+
+            // Re-render events list
+            renderEventsList();
+        }
+
+        // Filter events by type
+        function filterEventsByType(filterType) {
+            activeFilter = filterType;
+
+            if (filterType === 'all') {
+                filteredEvents = [...allEvents];
+            } else if (filterType === 'culturalEvents') {
+                filteredEvents = allEvents.filter(event => event.type === 'culturalEvents');
+            } else if (filterType === 'culturalPrograms') {
+                filteredEvents = allEvents.filter(event => event.type === 'culturalPrograms');
+            }
+
+            // Re-render events list
+            renderEventsList();
+        }
+
+        // Show temporary notification
+        function showNotification(message, isError = false) {
+            // Remove existing notification
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            if (isError) {
+                notification.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+            }
+
+            notification.innerHTML = `
+                <i class="fas fa-${isError ? 'exclamation-triangle' : 'check-circle'}"></i>
+                <span>${message}</span>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Remove after animation completes
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
