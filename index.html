@@ -964,7 +964,7 @@
                 emptyState.style.display = 'block';
             }
         }
-
+window.isTerminated=false;
         // Load cultural events data (文化藝術盛事)
         async function loadCulturalEventsData() {
             try {
@@ -973,6 +973,11 @@
                 const response = await fetch(`${PROXY_URL}/${apiUrl}`);
 
                 if (!response.ok) {
+                    if(!isTerminated){
+                        isTerminated=true;
+                    alert(`請先啟用 CORS Proxy 服務（${PROXY_URL}），HTTP 狀態碼: ${response.status}。`);
+                    window.open(PROXY_URL, "_blank");
+                    }
                     return;
                 }
 
@@ -1014,8 +1019,11 @@
                 const response = await fetch(`${PROXY_URL}/${apiUrl}`);
 
                 if (!response.ok) {
+                    if(!isTerminated){
+                        isTerminated=true;
                     alert(`請先啟用 CORS Proxy 服務（${PROXY_URL}），HTTP 狀態碼: ${response.status}。`);
                     window.open(PROXY_URL, "_blank");
+                    }
                     return;
                 }
 
@@ -1054,6 +1062,11 @@
                 const response = await fetch(`${PROXY_URL}/${apiUrl}`);
 
                 if (!response.ok) {
+                    if(!isTerminated){
+                        isTerminated=true;
+                    alert(`請先啟用 CORS Proxy 服務（${PROXY_URL}），HTTP 狀態碼: ${response.status}。`);
+                    window.open(PROXY_URL, "_blank");
+                    }
                     return;
                 }
 
